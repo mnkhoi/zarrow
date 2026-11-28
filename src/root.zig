@@ -2,17 +2,22 @@
 const std = @import("std");
 const Io = std.Io;
 
-/// This is a documentation comment to explain the `printAnotherMessage` function below.
-///
-/// Accepting an `Io.Writer` instance is a handy way to write reusable code.
-pub fn printAnotherMessage(writer: *Io.Writer) Io.Writer.Error!void {
-    try writer.print("Run `zig build test` to run the tests.\n", .{});
-}
+// We are going to work with 64 bit aligned implementation
 
-pub fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
+const Bitmap = struct {
+    data: [64]u8 align(64) = @splat(0),
 
-test "basic add functionality" {
-    try std.testing.expect(add(3, 7) == 10);
-}
+    pub fn is_set(self: Bitmap, index: u64) bool {
+        return 0b1 == self.data[index / 8] & (1 << (index % 8));
+    }
+
+    pub fn set(self: *Bitmap, index: u64) void {
+        self.data[index / 8] |= 1 << (index % 8);
+    }
+};
+
+const DataType = enum {};
+
+const Metadata = struct { data_type: DataType, length: i64, null_count: i64 };
+
+const FixedSizedPrimitive = struct { metadata: Metadata, validity_bitmap: *Bitmap, value_buffer: *[]u8 };
